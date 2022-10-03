@@ -1,8 +1,27 @@
 import React from 'react';
 
-const ProductList = ({ productItems }) => {
-    return productItems.map(({ id, name, imgSrc, price }) => (
-        <article>
+const ProductList = ({ productItems, toggleCart, cartItems, setCartItems }) => {
+    const handleAddProduct = (idx) => {
+        const currentProduct = productItems[idx];
+        const checkedIndex = cartItems.findIndex(
+            (item) => item.id === currentProduct.id
+        );
+
+        if (checkedIndex === -1) {
+            const newCartItems = [
+                ...cartItems,
+                { ...currentProduct, count: 1 },
+            ];
+            setCartItems(newCartItems);
+        } else {
+            const newCartItems = [...cartItems];
+            newCartItems[checkedIndex].count += 1;
+            setCartItems(newCartItems);
+        }
+        toggleCart();
+    };
+    return productItems.map(({ id, name, imgSrc, price }, idx) => (
+        <article onClick={() => handleAddProduct(idx)} key={id}>
             <div className="rounded-lg overflow-hidden border-2 relative">
                 <img
                     src={imgSrc}
@@ -20,7 +39,7 @@ const ProductList = ({ productItems }) => {
             </div>
             <h3 className="mt-4 text-gray-700">{name}</h3>
             <p className="mt-1 text-lg font-semibold text-gray-900">
-                {price.toLocaleString()}
+                {price.toLocaleString()}원
             </p>
         </article>
     ));

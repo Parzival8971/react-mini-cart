@@ -8,20 +8,23 @@ import Backdrop from './components/Backdrop';
 import getProductData from './api/getProductData';
 
 function App() {
+    const localCartState = localStorage.getItem('cartState');
+    const initialCartItem = localCartState ? JSON.parse(localCartState) : [];
+
     const [productItems, setProductItems] = useState([]);
-    const [cartItems, setCartItems] = useState([
-        {
-            id: 1,
-            imgSrc: 'asset/cherry.png',
-            name: '체리 두알',
-            price: 10000,
-            count: 1,
-        },
-    ]);
+    const [cartItems, setCartItems] = useState(initialCartItem);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
     const toggleCart = () => {
         setIsCartOpen((prev) => !prev);
+    };
+
+    const totalCount = cartItems
+        .reduce((acc, cur) => cur.price * cur.count + acc, 0)
+        .toLocaleString();
+
+    const saveToLocalStorage = () => {
+        localStorage.setItem('cartState', JSON.stringify(cartItems));
     };
 
     useEffect(() => {
@@ -60,7 +63,12 @@ function App() {
                         {productItems.length === 0 ? (
                             <h1>상품이 없습니다</h1>
                         ) : (
-                            <ProductList productItems={productItems} />
+                            <ProductList
+                                productItems={productItems}
+                                toggleCart={toggleCart}
+                                cartItems={cartItems}
+                                setCartItems={setCartItems}
+                            />
                         )}
                     </div>
                 </section>
@@ -91,7 +99,7 @@ function App() {
                                             stroke="currentColor"
                                         >
                                             <path
-                                                stroke-width="2"
+                                                strokeWidth="2"
                                                 d="M6 18L18 6M6 6l12 12"
                                             ></path>
                                         </svg>
@@ -99,26 +107,30 @@ function App() {
                                 </div>
                             </div>
                             <div id="cart-list">
-                                <CartList cartItems={cartItems} />
+                                <CartList
+                                    cartItems={cartItems}
+                                    setCartItems={setCartItems}
+                                />
                             </div>
                         </div>
                         <div className="border-t border-gray-200 p-6">
                             <div className="flex justify-between font-medium">
                                 <p>결제금액</p>
                                 <p className="font-bold" id="total-count">
-                                    0원
+                                    {totalCount + '원'}
                                 </p>
                             </div>
                             <a
                                 id="payment-btn"
                                 href="./"
                                 className="flex items-center justify-center rounded-md border border-transparent bg-sky-400 px-6 py-3 mt-6 font-medium text-white shadow-sm hover:bg-sky-500"
+                                onClick={saveToLocalStorage}
                             >
                                 결제하기
                             </a>
                             <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
                                 <p>
-                                    또는
+                                    또는{' '}
                                     <button
                                         type="button"
                                         className="font-medium text-sky-400 hover:text-sky-500"
